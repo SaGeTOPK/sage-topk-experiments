@@ -1,0 +1,175 @@
+syntax = "proto3";
+
+package iterators;
+
+message TriplePattern {
+  string subject = 1;
+  string predicate = 2;
+  string object = 3;
+  string graph = 4;
+}
+
+message SolutionMappings {
+  map<string, string> bindings = 1;
+}
+
+message SavedScanIterator {
+  TriplePattern pattern = 1;
+  map<string, string> muc = 2;
+  map<string, string> mu = 3;
+  string last_read = 4;
+  string timestamp = 5;
+  int64 cardinality = 6;
+}
+
+message SavedValuesIterator {
+  repeated SolutionMappings values = 1;
+  int64 next_value = 2;
+  map<string, string> muc = 3;
+}
+
+message SavedProjectionIterator {
+  repeated string values = 1;
+  oneof source {
+    SavedScanIterator scan_source = 2;
+    SavedIndexJoinIterator join_source = 3;
+    SavedBagUnionIterator union_source = 4;
+    SavedFilterIterator filter_source = 5;
+    SavedValuesIterator values_source = 6;
+    SavedTOPKServerIterator topk_server_source = 7;
+    SavedPartialTOPKIterator partial_topk_source = 8;
+    SavedRankFilterIterator rank_filter_source = 9;
+  }
+}
+
+message SavedLimitIterator {
+  oneof source {
+    SavedScanIterator scan_source = 1;
+    SavedIndexJoinIterator join_source = 2;
+    SavedBagUnionIterator union_source = 3;
+    SavedFilterIterator filter_source = 4;
+    SavedValuesIterator values_source = 5;
+  }
+  int64 limit = 6;
+  int64 produced = 7;
+}
+
+message SavedTOPKServerIterator {
+  oneof source {
+    SavedScanIterator scan_source = 1;
+    SavedIndexJoinIterator join_source = 2;
+    SavedBagUnionIterator union_source = 3;
+    SavedFilterIterator filter_source = 4;
+    SavedValuesIterator values_source = 5;
+    SavedRankFilterIterator rank_filter_source = 6;
+  }
+  string expression = 7;
+  int64 limit = 8;
+  repeated SolutionMappings topk = 9;
+}
+
+message SavedPartialTOPKIterator {
+  oneof source {
+    SavedScanIterator scan_source = 1;
+    SavedIndexJoinIterator join_source = 2;
+    SavedBagUnionIterator union_source = 3;
+    SavedFilterIterator filter_source = 4;
+    SavedValuesIterator values_source = 5;
+    SavedRankFilterIterator rank_filter_source = 6;
+  }
+  string expression = 7;
+  int64 limit = 8;
+  map<string, string> threshold = 9;
+}
+
+message SavedRankFilterIterator {
+  oneof source {
+    SavedScanIterator scan_source = 1;
+    SavedIndexJoinIterator join_source = 2;
+    SavedBagUnionIterator union_source = 3;
+    SavedFilterIterator filter_source = 4;
+    SavedValuesIterator values_source = 5;
+    SavedRankFilterIterator rank_filter_source = 6;
+  }
+  string expression = 7;
+  bool is_partial = 8;
+}
+
+message SavedIndexJoinIterator {
+  oneof left {
+    SavedScanIterator scan_left = 1;
+    SavedProjectionIterator proj_left = 2;
+    SavedBagUnionIterator union_left = 3;
+    SavedIndexJoinIterator join_left = 4;
+    SavedFilterIterator filter_left = 5;
+    SavedValuesIterator values_left = 6;
+    SavedRankFilterIterator rank_filter_left = 7;
+  }
+  oneof right {
+    SavedScanIterator scan_right = 8;
+    SavedProjectionIterator proj_right = 9;
+    SavedBagUnionIterator union_right = 10;
+    SavedIndexJoinIterator join_right = 11;
+    SavedFilterIterator filter_right = 12;
+    SavedValuesIterator values_right = 13;
+    SavedRankFilterIterator rank_filter_right = 14;
+  }
+  map<string, string> muc = 15;
+}
+
+message SavedBagUnionIterator {
+  oneof left {
+    SavedScanIterator scan_left = 1;
+    SavedProjectionIterator proj_left = 2;
+    SavedBagUnionIterator union_left = 3;
+    SavedIndexJoinIterator join_left = 4;
+    SavedFilterIterator filter_left = 5;
+    SavedValuesIterator values_left = 6;
+    SavedRankFilterIterator rank_filter_left = 7;
+  }
+  oneof right {
+    SavedScanIterator scan_right = 8;
+    SavedProjectionIterator proj_right = 9;
+    SavedBagUnionIterator union_right = 10;
+    SavedIndexJoinIterator join_right = 11;
+    SavedFilterIterator filter_right = 12;
+    SavedValuesIterator values_right = 13;
+    SavedRankFilterIterator rank_filter_right = 14;
+  }
+}
+
+message SavedFilterIterator {
+  oneof source {
+    SavedScanIterator scan_source = 1;
+    SavedProjectionIterator proj_source = 2;
+    SavedFilterIterator filter_source = 3;
+    SavedIndexJoinIterator join_source = 4;
+    SavedValuesIterator values_source = 5;
+    SavedRankFilterIterator rank_filter_source = 6;
+  }
+  string expression = 7;
+  repeated string variables = 8;
+  map<string, string> mu = 9;
+}
+
+message SavedInsertData {
+  map<string, uint64> nb_inserted = 1;
+}
+
+message SavedDeleteData {
+  map<string, uint64> nb_inserted = 1;
+}
+
+message RootTree {
+  oneof source {
+    SavedScanIterator scan_source = 1;
+    SavedProjectionIterator proj_source = 2;
+    SavedIndexJoinIterator join_source = 3;
+    SavedBagUnionIterator union_source = 4;
+    SavedFilterIterator filter_source = 5;
+    SavedInsertData insert_source = 6;
+    SavedDeleteData delete_source = 7;
+    SavedValuesIterator values_right = 8;
+    SavedLimitIterator limit_source = 9;
+  }
+}
